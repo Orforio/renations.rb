@@ -11,25 +11,29 @@ def rename_files(directory_source, directory_destination, directory_fileextensio
 	puts "Source: #{directory_source}"
 	puts "Destination: #{directory_destination}"
 
-	destination_list = Dir.glob(directory_source + "*." + directory_fileextension)
+	source_list = Dir.glob(directory_source + "*." + directory_fileextension)
+	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
 
 	destination_list.each do |destination_filename|
 		destination_ids.push(destination_filename[/\/(p?\d+)_/, 1])
 		puts destination_filename[/\/(p?\d+)_/, 1]
 	end
 
-	puts destination_ids
-
-	source.each do |source_filename|
-		# Stuff
+	source_list.each do |source_filename|
+		puts source_filename
+		if destination_ids.index(source_filename[/\/(p?\d+)_/, 1])
+			puts "Yes, " + source_filename[/\/(p?\d+)_/, 1] + " is present."
+		else
+			puts "No, " + source_filename[/\/(p?\d+)_/, 1] + " is not present."
+		end
 	end
 end
 
 # Hardcoded values for testing
 # TODO: Ask user for input
 
-directory_source = "d:/Temporary/Rename/naiseanta5_stills/"
-directory_destination = "d:/Temporary/Rename/photographs_cropped/"
+directory_source = "D:/Richard/Developer/renations.rb/naiseanta5_stills/"
+directory_destination = "D:/Richard/Developer/renations.rb/photographs_cropped/"
 directory_fileextension = "jpg"
 
 rename_files(directory_source, directory_destination, directory_fileextension)

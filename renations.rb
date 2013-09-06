@@ -1,7 +1,11 @@
+# TODO: turn stuff into classes and DRYer
+
 def check_arguments
 	directory_source = ARGV[0]
 	directory_destination = ARGV[1]
 	directory_fileextension = ARGV[2] ||= "png"
+	spreadsheet_sheet = ARGV[3] ||= 1
+	use_spreadsheet = false
 
 	unless directory_source && directory_destination
 		puts "Usage: $> ruby renations.rb source_folder destination_folder file_extension"
@@ -9,25 +13,40 @@ def check_arguments
 		exit
 	end
 
-	directory_source += "/" unless directory_source[/\/\z/]
+	if directory_source[/\.xlsx\z/]
+		if File.exists?(directory_source)
+			use_spreadsheet = true
+		else
+			puts "Source spreadsheet does not exist"
+			exit
+		end
+	else
+		directory_source += "/" unless directory_source[/\/\z/]
+		unless File.directory?(directory_source)
+			puts "Source not found."
+			exit
+		end
+	end
+	
 	directory_destination += "/" unless directory_destination[/\/\z/]
 
-	unless File.directory?(directory_source)
-		puts "Source directory not found."
-		exit
-	end
-
 	unless File.directory?(directory_destination)
-		puts "Destination directory not found."
+		puts "Destination not found."
 		exit
 	end
 
-	puts "Source directory: #{directory_source}"
+	puts use_spreadsheet ? "Source migration log: #{directory_source}" : "Source directory: #{directory_source}"
 	puts "Destination directory: #{directory_destination}"
 	puts "File extension: #{directory_fileextension}"
 	puts "Is this correct? Type y to continue."
 
-	rename_files(directory_source, directory_destination, directory_fileextension) if STDIN.gets.chomp == "y"
+	STDIN.gets.chomp == "y" ? use_spreadsheet ? rename_spreadsheet(directory_source, directory_destination, directory_fileextension, spreadsheet_sheet) : rename_files(directory_source, directory_destination, directory_fileextension) : exit
+end
+
+def rename_spreadsheet(spreadsheet_source, directory_destination, directory_fileextension, spreadsheet_sheet = 1)
+	require 'spreadsheet'
+	# Do stuff
+	puts "Spreadsheet time!"
 end
 
 def rename_files(directory_source, directory_destination, directory_fileextension)

@@ -16,10 +16,12 @@ On both: copy renations.rb into a directory, then copy the two directories you w
 At the moment you can only use this with two directories, migration log support is coming.
 
 From the command prompt, run:
+
     ruby renations.rb source_folder destination_folder file_extension
 replacing "source_folder", "destination_folder" and "file_extention" to the relevant details. If no file_extension is supplied, it will default to png.
 
 ## TODO: Migration log spreadsheet support
 
 Run the following to install the necessary dependencies:
+
     gem install -p http://www-cache.reith.bbc.co.uk:80 spreadsheet

@@ -9,6 +9,19 @@ def check_arguments
 		exit
 	end
 
+	directory_source += "/" unless directory_source[/\/\z/]
+	directory_destination += "/" unless directory_destination[/\/\z/]
+
+	unless File.directory?(directory_source)
+		puts "Source directory not found."
+		exit
+	end
+
+	unless File.directory?(directory_destination)
+		puts "Destination directory not found."
+		exit
+	end
+
 	puts "Source directory: #{directory_source}"
 	puts "Destination directory: #{directory_destination}"
 	puts "File extension: #{directory_fileextension}"
@@ -18,15 +31,8 @@ def check_arguments
 end
 
 def rename_files(directory_source, directory_destination, directory_fileextension)
-	source = Dir.new(directory_source) if File.directory?(directory_source)
-	destination = Dir.new(directory_destination) if File.directory?(directory_destination)
 	destination_ids = Array.new
 	files_changed, files_skipped = 0, 0
-
-	unless source && destination
-		puts "Could not find directories given"
-		exit
-	end
 
 	puts "Source: #{directory_source}"
 	puts "Destination: #{directory_destination}"

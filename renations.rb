@@ -45,8 +45,25 @@ end
 
 def rename_spreadsheet(spreadsheet_source, directory_destination, directory_fileextension, spreadsheet_sheet = 1)
 	require 'spreadsheet'
-	# Do stuff
+
+	source_list, destination_ids = Array.new, Array.new
+	
 	puts "Spreadsheet time!"
+
+	spreadsheet = Spreadsheet.open(spreadsheet_source)
+	sheet = spreadsheet.worksheet(1) # Currently hardcoded for testing purposes
+
+	sheet.each 11 do |row| # Currently hardcoded, 12 refers to data starting at row 12
+		source_list.push(row[9]) # Currently hardcoded, complete filenames are stored in column J/9
+	end
+
+	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
+
+	destination_list.each do |destination_filename|
+		destination_ids.push(destination_filename[/\/(p?\d+)_/, 1])
+	end
+
+	puts source_list
 end
 
 def rename_files(directory_source, directory_destination, directory_fileextension)

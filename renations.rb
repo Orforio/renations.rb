@@ -47,8 +47,9 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	require 'roo'
 
 	source_list, destination_ids = Array.new, Array.new
+	files_changed, files_skipped = 0, 0
 	
-	puts "Spreadsheet time!"
+	puts "Please wait..."
 
 	sheet = Roo::Excelx.new(spreadsheet_source)
 	sheet.sheet(1)#.row(12) # Currently hardcoded for testing purposes
@@ -63,7 +64,19 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 		destination_ids.push(destination_filename[/\/(p?\d+)_/, 1])
 	end
 
-	puts source_list
+	source_list.each do |hash|
+		if destination_index = destination_ids.index(hash[:job])
+			#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + hash[:filename].to_s + "." + directory_fileextension}"
+			File.rename(destination_list[destination_index], directory_destination + hash[:filename].to_s + "." + directory_fileextension)
+			files_changed += 1
+		else
+			puts "Skipping #{hash[:filename]}"
+			files_skipped += 1
+		end
+	end
+
+	puts "Renaming finished."
+	puts "Renamed: #{files_changed}, Skipped: #{files_skipped}"
 end
 
 def rename_files(directory_source, directory_destination, directory_fileextension)

@@ -35,3 +35,4 @@ The script will currently only accept spreadsheets with an .xlsx extension.
 
 - Slideshows (s001a, s001b, etc) are not supported and will be skipped.
 - Multiple filenames with the same job number will cause the script to error out (ie, 001_image_304.jpg, 001_image_464.jpg, etc).
+- The quality of the code is atrocious and needs some serious refactoring.

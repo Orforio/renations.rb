@@ -1,15 +1,18 @@
 # TODO: turn stuff into classes and DRYer
+IMAGE_SIZES = [624, 464, 304]
 
 def check_arguments
 	directory_source = ARGV[0]
 	directory_destination = ARGV[1]
-	directory_fileextension = ARGV[2] ||= "png"
+	directory_fileext = ARGV[2] ||= "png"
 	spreadsheet_sheet = ARGV[3] ||= 1
 	use_spreadsheet = false
 
+	directory_fileextension = directory_fileext.delete(".")
+
 	unless directory_source && directory_destination
-		puts "Usage: $> ruby renations.rb source_folder destination_folder file_extension"
-		puts "Example: $> ruby renations.rb images/welsh/ images/english/ jpg"
+		puts "Usage: $ ruby renations.rb source_folder|migration_log.xlsx destination_folder file_extension"
+		puts "Example: $ ruby renations.rb images/welsh/ images/english/ jpg"
 		exit
 	end
 
@@ -52,22 +55,27 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	puts "Please wait..."
 
 	sheet = Roo::Excelx.new(spreadsheet_source)
-	sheet.sheet(1)#.row(12) # Currently hardcoded for testing purposes
+	sheet.sheet(0) # Currently hardcoded for testing purposes
 
-	sheet.each(:job => 'Job No.', :filename => '^New\sfilename\s') do |hash| # Currently hardcoded, 12 refers to data starting at row 12
-		source_list.push(hash) # Currently hardcoded, complete filenames are stored in column J/9
+	sheet.each(:job => 'Job No.', :filename => '^New\sfilename\s', :wlarge => '^large\swidth', :wmedium => '^medium\swidth', :wsmall => '^small\swidth') do |hash|
+		if hash[:job] && hash[:job][/^(p?\d+)/, 1]
+			if hash[:wlarge] && hash[:wmedium] && hash[:wsmall]
+				hash[:wlarge], hash[:wmedium], hash[:wsmall] = hash[:wlarge].to_int, hash[:wmedium].to_int, hash[:wsmall].to_int
+			end
+			puts source_list << hash
+		end
 	end
 
 	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
 
 	destination_list.each do |destination_filename|
-		destination_ids.push(destination_filename[/\/(p?\d+)_/, 1])
+		destination_ids << [destination_filename[/\/(p?\d+)_/, 1], destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1]]
 	end
 
 	source_list.each do |hash|
 		if destination_index = destination_ids.index(hash[:job])
 			#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + hash[:filename].to_s + "." + directory_fileextension}"
-			File.rename(destination_list[destination_index], directory_destination + hash[:filename].to_s + "." + directory_fileextension)
+			#File.rename(destination_list[destination_index], directory_destination + hash[:filename].to_s + "." + directory_fileextension)
 			files_changed += 1
 		else
 			puts "Skipping #{hash[:filename]}"

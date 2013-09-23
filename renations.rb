@@ -63,7 +63,7 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 				puts "WARNING: #{hash[:job]} has an invalid LARGE width." unless hash[:wlarge] == IMAGE_SIZES[0] || hash[:wlarge] == IMAGE_SIZES[2]
 				puts "WARNING: #{hash[:job]} has an invalid MEDIUM width." unless hash[:wmedium] == IMAGE_SIZES[1] || hash[:wmedium] == IMAGE_SIZES[2]
 				puts "WARNING: #{hash[:job]} has an invalid SMALL width." unless hash[:wsmall] == IMAGE_SIZES[2]
-				hash[:wlarge], hash[:wmedium], hash[:wsmall] = hash[:wlarge].to_int, hash[:wmedium].to_int, hash[:wsmall].to_int
+				hash[:wlarge], hash[:wmedium], hash[:wsmall] = hash[:wlarge].to_i, hash[:wmedium].to_i, hash[:wsmall].to_i
 			end
 			source_list << hash
 		end
@@ -72,14 +72,14 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
 
 	destination_list.each do |destination_filename|
-		destination_ids << [:job => destination_filename[/\/(p?\d+)_/, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1]]
+		destination_ids << [:job => destination_filename[/\/(p?\d+)_/, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1].to_i]
 	end
 
-	source_list.each do |hash|
-		puts hash
-		puts destination_ids[0]
-		if destination_index = destination_ids.index { |x| (x[:job] == hash[:job]) && (x[:size] == hash[:wlarge]) } # UP TO HERE
-			puts "Renaming #{destination_list[destination_index]} to #{directory_destination + hash[:filename].to_s + "_" + hash[:wlarge] + "." + directory_fileextension}"
+	source_list.each do |source_hash|
+		if destination_index = destination_ids.index do |destination_hash, x|
+				(destination_hash[:job] == source_hash[:job]) && (destination_hash[:size] == source_hash[:wlarge])
+			end
+			puts "Renaming #{destination_list[destination_index]} to #{directory_destination + source_hash[:filename].to_s + "_" + source_hash[:wlarge].to_s + "." + directory_fileextension}"
 			#File.rename(destination_list[destination_index], directory_destination + hash[:filename].to_s + "." + directory_fileextension)
 			files_changed += 1
 		else

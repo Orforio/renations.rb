@@ -76,15 +76,19 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	end
 
 	source_list.each do |source_hash|
-		if destination_index = destination_ids.index do |destination_hash, x|
-				(destination_hash[:job] == source_hash[:job]) && (destination_hash[:size] == source_hash[:wlarge])
+		image_widths = [source_hash[:wlarge], source_hash[:wmedium], source_hash[:wsmall]].uniq
+
+		image_widths.each do |image_width|
+			if destination_index = destination_ids.index do |destination_hash, x|
+					(destination_hash[:job] == source_hash[:job]) && (destination_hash[:size] == image_width)
+				end
+				#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + source_hash[:filename].to_s + "_" + image_width.to_s + "." + directory_fileextension}"
+				File.rename(destination_list[destination_index], directory_destination + source_hash[:filename].to_s + "_" + image_width.to_s + "." + directory_fileextension)
+				files_changed += 1
+			else
+				puts "Skipping #{source_hash[:filename]}_#{image_width}"
+				files_skipped += 1
 			end
-			puts "Renaming #{destination_list[destination_index]} to #{directory_destination + source_hash[:filename].to_s + "_" + source_hash[:wlarge].to_s + "." + directory_fileextension}"
-			#File.rename(destination_list[destination_index], directory_destination + hash[:filename].to_s + "." + directory_fileextension)
-			files_changed += 1
-		else
-			puts "Skipping #{hash[:filename]}"
-			files_skipped += 1
 		end
 	end
 

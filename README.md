@@ -27,12 +27,13 @@ replacing "source_folder", "destination_folder" and "file_extention" to the rele
 
 The second way is to supply a migration log and the directory containing the images to be renamed.
 
-    ruby renations.rb migration_log.xlsx destination_folder file_extension
+    ruby renations.rb migration_log.xlsx destination_folder file_extension graphics|photos
+where graphics or photos refers to the sheet you want to use. As above, if file_extension and/or graphics/photos are not supplied, they will default to png and graphics. If you want to use photos, you must specify the file extension too (which is usually jpg).
     
 The script will currently only accept spreadsheets with an .xlsx extension.
 
 ## Known Issues
 
 - Slideshows (s001a, s001b, etc) are not supported and will be skipped.
-- Multiple filenames with the same job number will cause the script to error out (ie, 001_image_304.jpg, 001_image_464.jpg, etc).
+- Duplicates (_d001) are not supported and will be skipped.
 - The quality of the code is atrocious and needs some serious refactoring.

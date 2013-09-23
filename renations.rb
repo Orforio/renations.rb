@@ -60,21 +60,26 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	sheet.each(:job => 'Job No.', :filename => '^New\sfilename\s', :wlarge => '^large\swidth', :wmedium => '^medium\swidth', :wsmall => '^small\swidth') do |hash|
 		if hash[:job] && hash[:job][/^(p?\d+)/, 1]
 			if hash[:wlarge] && hash[:wmedium] && hash[:wsmall]
+				puts "WARNING: #{hash[:job]} has an invalid LARGE width." unless hash[:wlarge] == IMAGE_SIZES[0] || hash[:wlarge] == IMAGE_SIZES[2]
+				puts "WARNING: #{hash[:job]} has an invalid MEDIUM width." unless hash[:wmedium] == IMAGE_SIZES[1] || hash[:wmedium] == IMAGE_SIZES[2]
+				puts "WARNING: #{hash[:job]} has an invalid SMALL width." unless hash[:wsmall] == IMAGE_SIZES[2]
 				hash[:wlarge], hash[:wmedium], hash[:wsmall] = hash[:wlarge].to_int, hash[:wmedium].to_int, hash[:wsmall].to_int
 			end
-			puts source_list << hash
+			source_list << hash
 		end
 	end
 
 	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
 
 	destination_list.each do |destination_filename|
-		destination_ids << [destination_filename[/\/(p?\d+)_/, 1], destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1]]
+		destination_ids << [:job => destination_filename[/\/(p?\d+)_/, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1]]
 	end
 
 	source_list.each do |hash|
-		if destination_index = destination_ids.index(hash[:job])
-			#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + hash[:filename].to_s + "." + directory_fileextension}"
+		puts hash
+		puts destination_ids[0]
+		if destination_index = destination_ids.index { |x| (x[:job] == hash[:job]) && (x[:size] == hash[:wlarge]) } # UP TO HERE
+			puts "Renaming #{destination_list[destination_index]} to #{directory_destination + hash[:filename].to_s + "_" + hash[:wlarge] + "." + directory_fileextension}"
 			#File.rename(destination_list[destination_index], directory_destination + hash[:filename].to_s + "." + directory_fileextension)
 			files_changed += 1
 		else

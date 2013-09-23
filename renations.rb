@@ -1,5 +1,6 @@
 # TODO: turn stuff into classes and DRYer
 IMAGE_SIZES = [624, 464, 304]
+REGEX_SPREADSHEET_JOBNO = /^(p?\d+)/ # Extract the job number only for regular graphics or photos
 
 def check_arguments
 	directory_source = ARGV[0]
@@ -47,7 +48,11 @@ def check_arguments
 	puts "Sheet: #{spreadsheet_sheet}" if use_spreadsheet
 	puts "Is this correct? Type y to continue."
 
-	STDIN.gets.chomp == "y" ? use_spreadsheet ? rename_spreadsheet(directory_source, directory_destination, directory_fileextension, spreadsheet_sheet) : rename_files(directory_source, directory_destination, directory_fileextension) : exit
+	if STDIN.gets.chomp == "y"
+		use_spreadsheet ? rename_spreadsheet(directory_source, directory_destination, directory_fileextension, spreadsheet_sheet) : rename_files(directory_source, directory_destination, directory_fileextension)
+	else
+		exit
+	end
 end
 
 def rename_spreadsheet(spreadsheet_source, directory_destination, directory_fileextension, spreadsheet_sheet)
@@ -62,19 +67,17 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	sheet.sheet(spreadsheet_sheet)
 
 	if spreadsheet_sheet == 1
-		sheet.each(:job => 'Job No.', :filename => '^New\sfilename\s') do |hash|
-			if hash[:job] && hash[:job][/^(p?\d+)/, 1]
-				source_list << hash
-			end
-		end
+		sheet.each(:job => 'Job No.', :filename => '^New\sfilename\s') { |hash| source_list << hash if hash[:job] && hash[:job][REGEX_SPREADSHEET_JOBNO, 1] }
 	else
 		sheet.each(:job => 'Job No.', :filename => '^New\sfilename\s', :wlarge => '^large\swidth', :wmedium => '^medium\swidth', :wsmall => '^small\swidth') do |hash|
-			if hash[:job] && hash[:job][/^(p?\d+)/, 1]
+			if hash[:job] && hash[:job][REGEX_SPREADSHEET_JOBNO, 1]
 				if hash[:wlarge] && hash[:wmedium] && hash[:wsmall]
 					puts "WARNING: #{hash[:job]} has an invalid LARGE width." unless hash[:wlarge] == IMAGE_SIZES[0] || hash[:wlarge] == IMAGE_SIZES[2]
 					puts "WARNING: #{hash[:job]} has an invalid MEDIUM width." unless hash[:wmedium] == IMAGE_SIZES[1] || hash[:wmedium] == IMAGE_SIZES[2]
 					puts "WARNING: #{hash[:job]} has an invalid SMALL width." unless hash[:wsmall] == IMAGE_SIZES[2]
 					hash[:wlarge], hash[:wmedium], hash[:wsmall] = hash[:wlarge].to_i, hash[:wmedium].to_i, hash[:wsmall].to_i
+				else
+					puts "WARNING: #{hash[:job]} has one or more missing widths."
 				end
 				source_list << hash
 			end

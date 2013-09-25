@@ -32,7 +32,7 @@ def check_arguments
 		end
 	end
 
-	directory_fileextension = directory_fileext.delete(".")
+	directory_fileextension = directory_fileext.delete(".").downcase
 	
 	directory_destination += "/" unless directory_destination[/\/\z/]
 
@@ -59,6 +59,8 @@ end
 def rename_spreadsheet(spreadsheet_source, directory_destination, directory_fileextension, spreadsheet_sheet)
 	require 'roo'
 
+	single_size_operation = false || (spreadsheet_sheet == 1 || directory_fileextension == "ai")
+
 	source_list, destination_ids = Array.new, Array.new
 	files_changed, files_skipped = 0, 0
 	
@@ -67,7 +69,7 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	sheet = Roo::Excelx.new(spreadsheet_source)
 	sheet.sheet(spreadsheet_sheet)
 
-	if spreadsheet_sheet == 1
+	if single_size_operation
 		sheet.each(:job => 'Job No.', :filename => '^New\sfilename\s') { |hash| source_list << hash if hash[:job] && hash[:job][REGEX_SPREADSHEET_JOBNO, 1] }
 	else
 		sheet.each(:job => 'Job No.', :filename => '^New\sfilename\s', :wlarge => '^large\swidth', :wmedium => '^medium\swidth', :wsmall => '^small\swidth') do |hash|
@@ -88,7 +90,7 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
 
 	destination_list.each do |destination_filename|
-		if spreadsheet_sheet == 1
+		if single_size_operation
 			destination_ids << destination_filename[REGEX_FILENAME_JOBNO, 1]
 		else
 			destination_ids << [:job => destination_filename[REGEX_FILENAME_JOBNO, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1].to_i]
@@ -96,7 +98,7 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	end
 
 	source_list.each do |source_hash|
-		if spreadsheet_sheet == 1
+		if single_size_operation
 			if destination_index = destination_ids.index(source_hash[:job])
 				#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + source_hash[:filename].to_s + "." + directory_fileextension}"
 				File.rename(destination_list[destination_index], "#{directory_destination}#{source_hash[:filename]}.#{directory_fileextension}")

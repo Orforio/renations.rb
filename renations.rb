@@ -2,6 +2,7 @@
 IMAGE_SIZES = [624, 464, 304]
 REGEX_SPREADSHEET_JOBNO = /^(p?\d+)/ # Extract the job number only for regular graphics or photos
 REGEX_FILENAME_JOBNO = /\/(p?\d+)_/
+REGEX_ILLEGAL_FILENAME = /\W+|[A-Z]+/
 
 def check_arguments
 	directory_source = ARGV[0]
@@ -82,6 +83,7 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 					source_list << hash
 				else
 					puts "WARNING: #{hash[:job]} has one or more missing widths, skipping."
+					files_skipped += 1
 				end
 			end
 		end
@@ -98,7 +100,10 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 	end
 
 	source_list.each do |source_hash|
-		if single_size_operation
+		if source_hash[:filename][REGEX_ILLEGAL_FILENAME]
+			puts "WARNING: #{source_hash[:filename]} contains illegal characters, skipping."
+			files_skipped += 1
+		elsif single_size_operation
 			if destination_index = destination_ids.index(source_hash[:job])
 				#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + source_hash[:filename].to_s + "." + directory_fileextension}"
 				File.rename(destination_list[destination_index], "#{directory_destination}#{source_hash[:filename]}.#{directory_fileextension}")

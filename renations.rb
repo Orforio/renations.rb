@@ -1,6 +1,7 @@
 # TODO: turn stuff into classes and DRYer
 IMAGE_SIZES = [624, 464, 304]
 REGEX_SPREADSHEET_JOBNO = /^(p?\d+)/ # Extract the job number only for regular graphics or photos
+REGEX_FILENAME_JOBNO = /\/(p?\d+)_/
 
 def check_arguments
 	directory_source = ARGV[0]
@@ -76,10 +77,10 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 					puts "WARNING: #{hash[:job]} has an invalid MEDIUM width." unless hash[:wmedium] == IMAGE_SIZES[1] || hash[:wmedium] == IMAGE_SIZES[2]
 					puts "WARNING: #{hash[:job]} has an invalid SMALL width." unless hash[:wsmall] == IMAGE_SIZES[2]
 					hash[:wlarge], hash[:wmedium], hash[:wsmall] = hash[:wlarge].to_i, hash[:wmedium].to_i, hash[:wsmall].to_i
+					source_list << hash
 				else
-					puts "WARNING: #{hash[:job]} has one or more missing widths."
+					puts "WARNING: #{hash[:job]} has one or more missing widths, skipping."
 				end
-				source_list << hash
 			end
 		end
 	end
@@ -88,9 +89,9 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 
 	destination_list.each do |destination_filename|
 		if spreadsheet_sheet == 1
-			destination_ids << destination_filename[/\/(p?\d+)_/, 1]
+			destination_ids << destination_filename[REGEX_FILENAME_JOBNO, 1]
 		else
-			destination_ids << [:job => destination_filename[/\/(p?\d+)_/, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1].to_i]
+			destination_ids << [:job => destination_filename[REGEX_FILENAME_JOBNO, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1].to_i]
 		end
 	end
 
@@ -98,7 +99,7 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 		if spreadsheet_sheet == 1
 			if destination_index = destination_ids.index(source_hash[:job])
 				#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + source_hash[:filename].to_s + "." + directory_fileextension}"
-				File.rename(destination_list[destination_index], directory_destination + source_hash[:filename].to_s + "." + directory_fileextension)
+				File.rename(destination_list[destination_index], "#{directory_destination}#{source_hash[:filename]}.#{directory_fileextension}")
 				files_changed += 1
 			else
 				puts "Skipping #{source_hash[:filename]}"
@@ -108,11 +109,9 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 			image_widths = [source_hash[:wlarge], source_hash[:wmedium], source_hash[:wsmall]].uniq
 
 			image_widths.each do |image_width|
-				if destination_index = destination_ids.index do |destination_hash, x|
-						(destination_hash[:job] == source_hash[:job]) && (destination_hash[:size] == image_width)
-					end
+				if destination_index = destination_ids.index { |destination_hash, x| (destination_hash[:job] == source_hash[:job]) && (destination_hash[:size] == image_width) }
 					#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + source_hash[:filename].to_s + "_" + image_width.to_s + "." + directory_fileextension}"
-					File.rename(destination_list[destination_index], directory_destination + source_hash[:filename].to_s + "_" + image_width.to_s + "." + directory_fileextension)
+					File.rename(destination_list[destination_index], "#{directory_destination}#{source_hash[:filename]}_#{image_width}.#{directory_fileextension}")
 					files_changed += 1
 				else
 					puts "Skipping #{source_hash[:filename]}_#{image_width}"
@@ -136,9 +135,7 @@ def rename_files(directory_source, directory_destination, directory_fileextensio
 	source_list = Dir.glob(directory_source + "*." + directory_fileextension)
 	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
 
-	destination_list.each do |destination_filename|
-		destination_ids.push(destination_filename[/\/(p?\d+)_/, 1])
-	end
+	destination_list.each { |destination_filename| destination_ids.push(destination_filename[REGEX_FILENAME_JOBNO, 1]) }
 
 	source_list.each do |source_filename|
 		if destination_index = destination_ids.index(source_filename[/\/(p?\d+)_/, 1])

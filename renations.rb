@@ -1,7 +1,7 @@
 # TODO: turn stuff into classes and DRYer
 IMAGE_SIZES = [624, 464, 304]
-REGEX_SPREADSHEET_JOBNO = /^(p?\d+)/ # Extract the job number only for regular graphics or photos
-REGEX_FILENAME_JOBNO = /\/(p?\d+)_/
+REGEX_SPREADSHEET_JOBNO = /\A(p?\d{3}|s\d{3}[a-z])/ # Extract the job number only for regular graphics, photos or slideshows
+REGEX_FILENAME_JOBNO = /\/(p?\d{3}|s\d{3}[a-z])_/
 REGEX_ILLEGAL_FILENAME = /\W+|[A-Z]+/
 
 def check_arguments

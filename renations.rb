@@ -95,7 +95,7 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 		if single_size_operation
 			destination_ids << destination_filename[REGEX_FILENAME_JOBNO, 1]
 		else
-			destination_ids << [:job => destination_filename[REGEX_FILENAME_JOBNO, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1].to_i]
+			destination_ids << {:job => destination_filename[REGEX_FILENAME_JOBNO, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1].to_i}
 		end
 	end
 
@@ -116,7 +116,7 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 			image_widths = [source_hash[:wlarge], source_hash[:wmedium], source_hash[:wsmall]].uniq
 
 			image_widths.each do |image_width|
-				if destination_index = destination_ids.index { |destination_hash, x| (destination_hash[:job] == source_hash[:job]) && (destination_hash[:size] == image_width) }
+				if destination_index = destination_ids.index { |destination_hash| (destination_hash[:job] == source_hash[:job]) && (destination_hash[:size] == image_width) }
 					#puts "Renaming #{destination_list[destination_index]} to #{directory_destination + source_hash[:filename].to_s + "_" + image_width.to_s + "." + directory_fileextension}"
 					File.rename(destination_list[destination_index], "#{directory_destination}#{source_hash[:filename]}_#{image_width}.#{directory_fileextension}")
 					files_changed += 1

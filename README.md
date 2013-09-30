@@ -34,6 +34,6 @@ The script will currently only accept spreadsheets with an .xlsx extension.
 
 ## Known Issues
 
-- Slideshows (s001a, s001b, etc) are not supported and will be skipped.
+- Slideshow .ai files only work if they are in separate files for each slide (s001a, s001b, etc). Single-version .ai files (s001 containing a, b and c artboards) will be skipped and must be done manually.
 - Duplicates (_d001) are not supported and will be skipped.
 - The quality of the code is atrocious and needs some serious refactoring.

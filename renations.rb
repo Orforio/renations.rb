@@ -91,11 +91,11 @@ def rename_spreadsheet(spreadsheet_source, directory_destination, directory_file
 
 	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
 
-	destination_list.each do |destination_filename|
+	destination_ids = destination_list.collect do |destination_filename|
 		if single_size_operation
-			destination_ids << destination_filename[REGEX_FILENAME_JOBNO, 1]
+			destination_filename[REGEX_FILENAME_JOBNO, 1]
 		else
-			destination_ids << {:job => destination_filename[REGEX_FILENAME_JOBNO, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1].to_i}
+			{:job => destination_filename[REGEX_FILENAME_JOBNO, 1], :size => destination_filename[/_([0-9]{3})\.#{directory_fileextension}$/, 1].to_i}
 		end
 	end
 
@@ -142,7 +142,7 @@ def rename_files(directory_source, directory_destination, directory_fileextensio
 	source_list = Dir.glob(directory_source + "*." + directory_fileextension)
 	destination_list = Dir.glob(directory_destination + "*." + directory_fileextension)
 
-	destination_list.each { |destination_filename| destination_ids.push(destination_filename[REGEX_FILENAME_JOBNO, 1]) }
+	destination_ids = destination_list.collect { |destination_filename| destination_filename[REGEX_FILENAME_JOBNO, 1] }
 
 	source_list.each do |source_filename|
 		if destination_index = destination_ids.index(source_filename[/\/(p?\d+)_/, 1])

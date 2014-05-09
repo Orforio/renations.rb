@@ -1,6 +1,6 @@
 # renations.rb
 
-A batch rename tool for the K&amp;L Infographics Nations teams.
+A batch rename tool for the K&amp;L Bitesize Nations teams.
 It takes the filenames from the source directory and applies them to the files in the destination directory.
 Only files with matching job numbers will be modified.
 
@@ -15,6 +15,10 @@ On both: copy renations.rb into a directory, then copy the two directories you w
 In order to use the migration log functionality, you must also install the "roo" Ruby gem by running this command. You only need to do it once.
 
     gem install -p http://www-cache.reith.bbc.co.uk:80 roo
+    
+As an alternative, if you have Bundler you can just run
+
+    bundle install
 
 ## Usage
 
